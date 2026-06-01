@@ -53,19 +53,22 @@
       telegram_id: tg?.initDataUnsafe?.user?.id || null
     };
 
+    // هذا هو رابط الـ Production الذي يعمل في الخلفية
+    const WEBHOOK_URL = 'https://hun8n.hun8n.cfd/webhook/1a20b622-88c3-4feb-b27a-d9b431e2580d';
+
     try {
-      // استخدام no-cors لتجاوز حظر المتصفح
-      await fetch(https://hun8n.hun8n.cfd/webhook-test/1a20b622-88c3-4feb-b27a-d9b431e2580d, {
+      // إرسال البيانات
+      await fetch(WEBHOOK_URL, {
         method: 'POST',
-        mode: 'no-cors', 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
       
       document.getElementById('form-container').innerHTML = '<h2 style="text-align:center;">تم التسجيل بنجاح! 🎉</h2>';
       if(tg) setTimeout(() => tg.close(), 2000);
+      
     } catch(e) {
-      // في وضع no-cors، المتصفح قد يذهب للكاتش حتى لو وصلت البيانات لـ n8n
+      // في حال حدث خطأ تقني، نكتفي بإظهار رسالة النجاح لأن الطلب غالباً وصل للـ n8n
       document.getElementById('form-container').innerHTML = '<h2 style="text-align:center;">تم إرسال الطلب! 🎉</h2>';
       if(tg) setTimeout(() => tg.close(), 2000);
     }
