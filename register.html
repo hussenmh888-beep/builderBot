@@ -2,51 +2,75 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BuilderBot</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>BuilderBot — التسجيل</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-    body { background: #0d0f14; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-    .card { background: #161923; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; border: 1px solid #252b38; }
-    input { width: 100%; padding: 15px; margin: 10px 0; background: #1c2130; border: 1px solid #252b38; border-radius: 12px; color: #fff; box-sizing: border-box; }
-    button { width: 100%; padding: 15px; background: #3b82f6; border: none; border-radius: 12px; color: #fff; font-weight: bold; cursor: pointer; }
+  :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #3b82f6; }
+  body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+  .card { background: var(--card); padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; box-shadow: 0 10px 15px rgba(0,0,0,0.3); }
+  h2 { text-align: center; margin-bottom: 20px; }
+  input { width: 100%; padding: 15px; margin: 10px 0; background: #334155; border: none; border-radius: 12px; color: white; box-sizing: border-box; }
+  button { width: 100%; padding: 15px; border-radius: 12px; border: none; background: var(--accent); color: white; font-weight: bold; cursor: pointer; }
 </style>
 </head>
 <body>
 
 <div class="card" id="form">
-    <h2 style="text-align:center;">BuilderBot</h2>
-    <input type="text" id="name" placeholder="الاسم الكامل">
-    <input type="text" id="job" placeholder="الوظيفة">
-    <input type="tel" id="phone" placeholder="رقم الجوال">
-    <button onclick="sendData()" id="btn">إرسال البيانات</button>
+  <h2>BuilderBot</h2>
+  <input type="text" id="name" placeholder="الاسم الكامل">
+  <input type="text" id="job" placeholder="الوظيفة">
+  <input type="tel" id="phone" placeholder="رقم الجوال">
+  <button id="btn" onclick="submitData()">تأكيد وإرسال</button>
 </div>
 
 <script>
-    async function sendData() {
-        const btn = document.getElementById('btn');
-        const data = {
-            name: document.getElementById('name').value,
-            job: document.getElementById('job').value,
-            phone: document.getElementById('phone').value
-        };
+  // تهيئة WebApp
+  const tg = window.Telegram?.WebApp;
+  if (tg) { tg.ready(); tg.expand(); }
 
-        btn.innerText = 'جاري الإرسال...';
-        btn.disabled = true;
+  // اكتشاف وضع الاختبار تلقائياً: إذا فتحت الرابط بـ ?debug=true يستخدم رابط الـ Test
+  const urlParams = new URLSearchParams(window.location.search);
+  const IS_TEST = urlParams.has('debug');
 
-        try {
-            // ضع هنا رابط Production URL الذي نسخته من n8n
-            await fetch('https://hun8n.hun8n.cfd/webhook/1a20b622-88c3-4feb-b27a-d9b431e2580d', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            document.getElementById('form').innerHTML = '<h2 style="text-align:center;">تم الاستلام بنجاح! 🎉</h2>';
-        } catch(e) {
-            alert("حدث خطأ في الاتصال");
-            btn.innerText = 'إرسال البيانات';
-            btn.disabled = false;
-        }
+  const WEBHOOK_TEST = 'https://hun8n.hun8n.cfd/webhook-test/1a20b622-88c3-4feb-b27a-d9b431e2580d';
+  const WEBHOOK_PROD = 'https://hun8n.hun8n.cfd/webhook/1a20b622-88c3-4feb-b27a-d9b431e2580d';
+
+  async function submitData() {
+    const btn = document.getElementById('btn');
+    
+    // جلب بيانات المستخدم من تيليجرام
+    const data = {
+      name: document.getElementById('name').value,
+      job: document.getElementById('job').value,
+      phone: document.getElementById('phone').value,
+      telegram_id: tg?.initDataUnsafe?.user?.id || 'web_user',
+      username: tg?.initDataUnsafe?.user?.username || 'no_username'
+    };
+
+    if(!data.name || !data.job || !data.phone) return alert("يرجى تعبئة جميع الحقول!");
+
+    btn.innerText = 'جاري الإرسال...';
+    btn.disabled = true;
+
+    try {
+      // اختيار الرابط المناسب
+      const targetUrl = IS_TEST ? WEBHOOK_TEST : WEBHOOK_PROD;
+      
+      await fetch(targetUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      
+      document.getElementById('form').innerHTML = '<h2 style="text-align:center;">تم التسجيل بنجاح! 🎉</h2>';
+      if(tg) setTimeout(() => tg.close(), 2000);
+    } catch(e) {
+      alert("حدث خطأ في الاتصال، حاول مجدداً");
+      btn.innerText = 'تأكيد وإرسال';
+      btn.disabled = false;
     }
+  }
 </script>
 </body>
 </html>
