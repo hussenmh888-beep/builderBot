@@ -40,14 +40,15 @@
     const btn = document.getElementById('btn');
     
     // جلب بيانات المستخدم من تيليجرام
-    const data = {
-      name: document.getElementById('name').value,
-      job: document.getElementById('job').value,
-      phone: document.getElementById('phone').value,
-      telegram_id: tg?.initDataUnsafe?.user?.id || 'web_user',
-      username: tg?.initDataUnsafe?.user?.username || 'no_username'
-    };
-
+    // استبدل جزء تعريف data بهذا الجزء الأكثر دقة
+const user = tg?.initDataUnsafe?.user;
+const data = {
+    name: document.getElementById('name').value,
+    job: document.getElementById('job').value,
+    phone: document.getElementById('phone').value,
+    telegram_id: user ? user.id : 'NOT_TELEGRAM', // سيظهر NOT_TELEGRAM إذا فتحته خارج التيليجرام
+    username: user ? user.username : 'no_username'
+};
     if(!data.name || !data.job || !data.phone) return alert("يرجى تعبئة جميع الحقول!");
 
     btn.innerText = 'جاري الإرسال...';
