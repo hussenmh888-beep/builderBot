@@ -7,42 +7,26 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
-  :root { --bg: #0d0f14; --card: #161923; --border: #252b38; --accent: #3b82f6; --accent-glow: rgba(59,130,246,0.25); --text: #f0f2f7; --muted: #6b7280; --success: #22c55e; --error: #ef4444; --input-bg: #1c2130; }
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body { font-family: 'IBM Plex Sans Arabic', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 16px; overflow-x: hidden; }
-  .container { width: 100%; max-width: 420px; position: relative; z-index: 1; }
-  .header { text-align: center; margin-bottom: 32px; }
-  .logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-  .logo-icon { width: 42px; height: 42px; background: linear-gradient(135deg, #3b82f6, #6366f1); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-  .logo-text { font-size: 22px; font-weight: 700; background: linear-gradient(135deg, #fff 40%, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 28px 24px; }
-  .step { display: none; } .step.active { display: block; }
-  .field { margin-bottom: 18px; }
-  .field label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
-  .field input { width: 100%; background: var(--input-bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 13px 16px; font-size: 15px; color: var(--text); outline: none; }
-  .btn { width: 100%; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; border: none; margin-top: 8px; }
-  .btn-primary { background: linear-gradient(135deg, #3b82f6, #6366f1); color: #fff; }
-  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-left: 8px; }
+  :root { --bg: #0d0f14; --card: #161923; --border: #252b38; --accent: #3b82f6; --text: #f0f2f7; --error: #ef4444; --input-bg: #1c2130; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'IBM Plex Sans Arabic', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 24px; width: 100%; max-width: 400px; }
+  .field { margin-bottom: 16px; }
+  .field input { width: 100%; background: var(--input-bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; color: var(--text); outline: none; }
+  .field input.error { border-color: var(--error); }
+  .btn { width: 100%; padding: 14px; border-radius: 12px; background: var(--accent); color: white; border: none; font-weight: 600; cursor: pointer; }
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 8px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="header">
-    <div class="logo"><div class="logo-icon">🤖</div><div class="logo-text">BuilderBot</div></div>
-  </div>
-  <div class="card">
-    <div class="step active" id="step1">
-      <div class="field"><label>الاسم الكامل</label><input type="text" id="name" placeholder="محمد أحمد"></div>
-      <div class="field"><label>الوظيفة</label><input type="text" id="job" placeholder="مطوّر..."></div>
-      <div class="field"><label>رقم الجوال</label><input type="tel" id="phone" placeholder="أدخل رقم الجوال"></div>
-      <button class="btn btn-primary" onclick="submitForm()" id="submitBtn">إرسال</button>
-    </div>
-    <div class="step" id="step3">
-      <div style="text-align:center;">تم التسجيل بنجاح! 🎉</div>
-    </div>
-  </div>
+<div class="card" id="form-container">
+  <h2 style="text-align: center; margin-bottom: 20px;">BuilderBot</h2>
+  <div class="field"><input type="text" id="name" placeholder="الاسم الكامل"></div>
+  <div class="field"><input type="text" id="job" placeholder="الوظيفة"></div>
+  <div class="field"><input type="tel" id="phone" placeholder="رقم الجوال"></div>
+  <button class="btn" onclick="submitForm()" id="submitBtn">إرسال</button>
 </div>
 
 <script>
@@ -50,31 +34,39 @@
   if (tg) { tg.ready(); tg.expand(); }
 
   async function submitForm() {
+    const name = document.getElementById('name');
+    const job = document.getElementById('job');
+    const phone = document.getElementById('phone');
     const btn = document.getElementById('submitBtn');
-    btn.innerHTML = 'جاري الإرسال... <span class="spinner"></span>';
-    
+
+    // التحقق من الحقول
+    if (!name.value || !job.value || !phone.value) {
+      alert("يرجى تعبئة جميع الحقول!");
+      return;
+    }
+
+    btn.innerHTML = '<span class="spinner"></span> جاري الإرسال...';
+    btn.disabled = true;
+
     const data = {
-      name: document.getElementById('name').value,
-      job: document.getElementById('job').value,
-      phone: document.getElementById('phone').value,
+      name: name.value,
+      job: job.value,
+      phone: phone.value,
       telegram_id: tg?.initDataUnsafe?.user?.id || null
     };
 
-    // تم وضع الرابط الخاص بك هنا
-    const WEBHOOK_URL = 'https://hun8n.hun8n.cfd/webhook/1a20b622-88c3-4feb-b27a-d9b431e2580d';
-
     try {
-      await fetch(WEBHOOK_URL, {
+      await fetch('https://hun8n.hun8n.cfd/webhook/1a20b622-88c3-4feb-b27a-d9b431e2580d', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-      document.getElementById('step1').style.display = 'none';
-      document.getElementById('step3').style.display = 'block';
+      document.getElementById('form-container').innerHTML = '<h2 style="text-align:center;">تم التسجيل بنجاح! 🎉</h2>';
       if(tg) setTimeout(() => tg.close(), 2000);
     } catch(e) {
-      alert("حدث خطأ في الاتصال");
+      alert("حدث خطأ، حاول مجدداً");
       btn.innerHTML = 'إرسال';
+      btn.disabled = false;
     }
   }
 </script>
