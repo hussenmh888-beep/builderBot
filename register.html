@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>BuilderBot — التسجيل</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #3b82f6; }
+  body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+  .card { background: var(--card); padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); }
+  h2 { text-align: center; margin-bottom: 20px; }
+  .field { margin-bottom: 15px; }
+  input { width: 100%; padding: 15px; border-radius: 12px; border: none; background: #334155; color: white; box-sizing: border-box; }
+  button { width: 100%; padding: 15px; border-radius: 12px; border: none; background: var(--accent); color: white; font-weight: bold; cursor: pointer; font-size: 16px; }
+  .loading { opacity: 0.7; cursor: not-allowed; }
+</style>
+</head>
+<body>
+
+<div class="card" id="form">
+  <h2>BuilderBot</h2>
+  <div class="field"><input type="text" id="name" placeholder="الاسم الكامل"></div>
+  <div class="field"><input type="text" id="job" placeholder="الوظيفة"></div>
+  <div class="field"><input type="tel" id="phone" placeholder="رقم الجوال"></div>
+  <button id="submitBtn" onclick="submitData()">تأكيد وإرسال</button>
+</div>
+
+<script>
+  const tg = window.Telegram?.WebApp;
+  if (tg) { tg.ready(); tg.expand(); }
+
+  async function submitData() {
+    const btn = document.getElementById('submitBtn');
+    const name = document.getElementById('name').value;
+    const job = document.getElementById('job').value;
+    const phone = document.getElementById('phone').value;
+
+    if(!name || !job || !phone) return alert("يرجى تعبئة الحقول!");
+
+    btn.innerText = 'جاري الإرسال...';
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    const data = { name, job, phone, tg_id: tg?.initDataUnsafe?.user?.id || 'web' };
+
+    try {
+      // ضع هنا رابط الـ Production الخاص بك
+      const res = await fetch('https://hun8n.hun8n.cfd/webhook/1a20b622-88c3-4feb-b27a-d9b431e2580d', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      
+      document.getElementById('form').innerHTML = '<h2 style="text-align:center;">تم التسجيل بنجاح! 🎉</h2>';
+      if(tg) setTimeout(() => tg.close(), 2000);
+    } catch (e) {
+      alert("حدث خطأ، يرجى المحاولة لاحقاً");
+      btn.innerText = 'تأكيد وإرسال';
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+  }
+</script>
+</body>
+</html>
