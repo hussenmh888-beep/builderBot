@@ -2,75 +2,44 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>BuilderBot — التسجيل</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
-  :root { --bg: #0d0f14; --card: #161923; --border: #252b38; --accent: #3b82f6; --text: #f0f2f7; --error: #ef4444; --input-bg: #1c2130; }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'IBM Plex Sans Arabic', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 24px; width: 100%; max-width: 400px; }
-  .field { margin-bottom: 16px; }
-  .field input { width: 100%; background: var(--input-bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; color: var(--text); outline: none; }
-  .btn { width: 100%; padding: 14px; border-radius: 12px; background: var(--accent); color: white; border: none; font-weight: 600; cursor: pointer; }
-  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 8px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-</style>
+<title>BuilderBot</title>
 </head>
 <body>
-
 <div class="card" id="form-container">
-  <h2 style="text-align: center; margin-bottom: 20px;">BuilderBot</h2>
-  <div class="field"><input type="text" id="name" placeholder="الاسم الكامل"></div>
-  <div class="field"><input type="text" id="job" placeholder="الوظيفة"></div>
-  <div class="field"><input type="tel" id="phone" placeholder="رقم الجوال"></div>
-  <button class="btn" onclick="submitForm()" id="submitBtn">إرسال</button>
+  <input type="text" id="name" placeholder="الاسم">
+  <input type="text" id="job" placeholder="الوظيفة">
+  <input type="tel" id="phone" placeholder="الجوال">
+  <button id="submitBtn" onclick="submitForm()">إرسال</button>
 </div>
 
 <script>
-  const tg = window.Telegram?.WebApp;
-  if (tg) { tg.ready(); tg.expand(); }
-
   async function submitForm() {
-    const name = document.getElementById('name').value;
-    const job = document.getElementById('job').value;
-    const phone = document.getElementById('phone').value;
     const btn = document.getElementById('submitBtn');
-
-    if (!name || !job || !phone) {
-      alert("يرجى تعبئة جميع الحقول!");
-      return;
-    }
-
-    btn.innerHTML = '<span class="spinner"></span> جاري الإرسال...';
-    btn.disabled = true;
-
+    btn.innerText = 'جاري الإرسال...';
+    
     const data = {
-      name: name,
-      job: job,
-      phone: phone,
-      telegram_id: tg?.initDataUnsafe?.user?.id || null
+      name: document.getElementById('name').value,
+      job: document.getElementById('job').value,
+      phone: document.getElementById('phone').value
     };
 
-    // هذا هو رابط الـ Production الذي يعمل في الخلفية
-    const WEBHOOK_URL = 'https://hun8n.hun8n.cfd/webhook/1a20b622-88c3-4feb-b27a-d9b431e2580d';
+    console.log("البيانات التي سيتم إرسالها:", data);
 
     try {
-      // إرسال البيانات
-      await fetch(WEBHOOK_URL, {
+      const response = await fetch('https://hun8n.hun8n.cfd/webhook/1a20b622-88c3-4feb-b27a-d9b431e2580d', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
       
-      document.getElementById('form-container').innerHTML = '<h2 style="text-align:center;">تم التسجيل بنجاح! 🎉</h2>';
-      if(tg) setTimeout(() => tg.close(), 2000);
+      console.log("تمت محاولة الإرسال، حالة الاستجابة:", response.status);
+      alert("تمت محاولة الإرسال! حالة الاتصال: " + response.status);
+      document.getElementById('form-container').innerHTML = '<h2>تم الإرسال!</h2>';
       
     } catch(e) {
-      // في حال حدث خطأ تقني، نكتفي بإظهار رسالة النجاح لأن الطلب غالباً وصل للـ n8n
-      document.getElementById('form-container').innerHTML = '<h2 style="text-align:center;">تم إرسال الطلب! 🎉</h2>';
-      if(tg) setTimeout(() => tg.close(), 2000);
+      console.error("خطأ:", e);
+      alert("حدث خطأ: " + e.message);
+      btn.innerText = 'إرسال';
     }
   }
 </script>
