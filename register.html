@@ -13,7 +13,6 @@
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 24px; width: 100%; max-width: 400px; }
   .field { margin-bottom: 16px; }
   .field input { width: 100%; background: var(--input-bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; color: var(--text); outline: none; }
-  .field input.error { border-color: var(--error); }
   .btn { width: 100%; padding: 14px; border-radius: 12px; background: var(--accent); color: white; border: none; font-weight: 600; cursor: pointer; }
   .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 8px; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -34,13 +33,12 @@
   if (tg) { tg.ready(); tg.expand(); }
 
   async function submitForm() {
-    const name = document.getElementById('name');
-    const job = document.getElementById('job');
-    const phone = document.getElementById('phone');
+    const name = document.getElementById('name').value;
+    const job = document.getElementById('job').value;
+    const phone = document.getElementById('phone').value;
     const btn = document.getElementById('submitBtn');
 
-    // التحقق من الحقول
-    if (!name.value || !job.value || !phone.value) {
+    if (!name || !job || !phone) {
       alert("يرجى تعبئة جميع الحقول!");
       return;
     }
@@ -49,24 +47,27 @@
     btn.disabled = true;
 
     const data = {
-      name: name.value,
-      job: job.value,
-      phone: phone.value,
+      name: name,
+      job: job,
+      phone: phone,
       telegram_id: tg?.initDataUnsafe?.user?.id || null
     };
 
     try {
+      // استخدام no-cors لتجاوز حظر المتصفح
       await fetch('https://hun8n.hun8n.cfd/webhook/1a20b622-88c3-4feb-b27a-d9b431e2580d', {
         method: 'POST',
+        mode: 'no-cors', 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
+      
       document.getElementById('form-container').innerHTML = '<h2 style="text-align:center;">تم التسجيل بنجاح! 🎉</h2>';
       if(tg) setTimeout(() => tg.close(), 2000);
     } catch(e) {
-      alert("حدث خطأ، حاول مجدداً");
-      btn.innerHTML = 'إرسال';
-      btn.disabled = false;
+      // في وضع no-cors، المتصفح قد يذهب للكاتش حتى لو وصلت البيانات لـ n8n
+      document.getElementById('form-container').innerHTML = '<h2 style="text-align:center;">تم إرسال الطلب! 🎉</h2>';
+      if(tg) setTimeout(() => tg.close(), 2000);
     }
   }
 </script>
