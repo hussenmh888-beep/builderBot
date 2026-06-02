@@ -1,92 +1,97 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>BuilderBot — التسجيل</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<style>
-  :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
-  body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-  .card { background: var(--card); padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; }
-  
-  /* الشعار مع تدرج لوني متحرك */
-  .logo { 
-    width: 80px; height: 80px; margin: 0 auto 20px auto;
-    border-radius: 20px;
-    background: linear-gradient(45deg, #3b82f6, #8b5cf6, #3b82f6);
-    background-size: 200% 200%;
-    animation: gradientMove 3s ease infinite;
-    display: flex; justify-content: center; align-items: center;
-    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
-  }
-  
-  @keyframes gradientMove {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BuilderBot — التسجيل</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --primary: #3b82f6; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .card { background: var(--card); padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); }
+        
+        .logo { 
+            width: 80px; height: 80px; margin: 0 auto 20px auto; border-radius: 20px;
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6, #3b82f6);
+            background-size: 200% 200%; animation: gradientMove 3s ease infinite;
+            display: flex; justify-content: center; align-items: center;
+        }
+        @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-  h2 { margin: 0 0 20px 0; }
-  input { width: 100%; padding: 15px; margin: 10px 0; background: #334155; border: none; border-radius: 12px; color: white; box-sizing: border-box; text-align: right; }
-  button { width: 100%; padding: 15px; border-radius: 12px; border: none; background: #3b82f6; color: white; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-  button:hover { background: #2563eb; }
-</style>
+        h2 { margin: 0 0 20px 0; font-size: 1.5rem; }
+        input { width: 100%; padding: 15px; margin: 10px 0; background: #334155; border: none; border-radius: 12px; color: white; box-sizing: border-box; text-align: right; font-size: 16px; }
+        input:focus { outline: 2px solid var(--primary); }
+        button { width: 100%; padding: 15px; border-radius: 12px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; font-size: 16px; }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        button:hover:not(:disabled) { background: #2563eb; }
+    </style>
 </head>
 <body>
 
 <div class="card" id="form">
-  <div class="logo">
-    <svg width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-      <path d="M6.5 2H20v20H4"/>
-    </svg>
-  </div> 
-  <h2>BuilderBot</h2>
-  
-  <input type="text" id="name" placeholder="الاسم الكامل">
-  <input type="text" id="job" placeholder="الوظيفة">
-  <input type="tel" id="phone" placeholder="رقم الهاتف">
-  
-  <button id="btn" onclick="submitData()">تأكيد وإرسال</button>
+    <div class="logo">
+        <svg width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H4"/>
+        </svg>
+    </div> 
+    <h2>BuilderBot</h2>
+    
+    <input type="text" id="name" placeholder="الاسم الكامل" required>
+    <input type="text" id="job" placeholder="الوظيفة" required>
+    <input type="tel" id="phone" placeholder="رقم الهاتف" required>
+    
+    <button id="btn" onclick="submitData()">تأكيد وإرسال</button>
 </div>
 
 <script>
-  const tg = window.Telegram?.WebApp;
-  if (tg) { tg.ready(); tg.expand(); }
+    // تهيئة Telegram WebApp
+    const tg = window.Telegram?.WebApp;
+    if (tg) { tg.ready(); tg.expand(); }
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const IS_TEST = urlParams.has('debug');
-  const WEBHOOK_URL = IS_TEST ? 'https://hun8n.hun8n.cfd/webhook-test/1a20b622-88c3-4feb-b27a-d9b431e2580d' : 'https://hun8n.hun8n.cfd/webhook/1a20b622-88c3-4feb-b27a-d9b431e2580d';
+    // الرابط الإنتاجي الثابت
+    const WEBHOOK_URL = 'https://hun8n.hun8n.cfd/webhook/1a20b622-88c3-4feb-b27a-d9b431e2580d';
 
-  async function submitData() {
-    const btn = document.getElementById('btn');
-    const data = {
-      name: document.getElementById('name').value,
-      job: document.getElementById('job').value,
-      phone: document.getElementById('phone').value,
-      telegram_id: tg?.initDataUnsafe?.user?.id || 'NOT_TELEGRAM'
-    };
+    async function submitData() {
+        const btn = document.getElementById('btn');
+        const name = document.getElementById('name').value;
+        const job = document.getElementById('job').value;
+        const phone = document.getElementById('phone').value;
 
-    if(!data.name || !data.job || !data.phone) return alert("يرجى تعبئة كافة الحقول");
+        if(!name || !job || !phone) {
+            alert("يرجى تعبئة كافة الحقول");
+            return;
+        }
 
-    btn.innerText = 'جاري الإرسال...';
-    btn.disabled = true;
+        const data = {
+            name: name,
+            job: job,
+            phone: phone,
+            telegram_id: tg?.initDataUnsafe?.user?.id || 'UNKNOWN_ID'
+        };
 
-    try {
-      await fetch(WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      document.getElementById('form').innerHTML = '<h2 style="margin:50px 0;">تم التسجيل بنجاح! 🎉</h2>';
-      if(tg) setTimeout(() => tg.close(), 2000);
-    } catch(e) {
-      alert("خطأ في الاتصال!");
-      btn.innerText = 'تأكيد وإرسال';
-      btn.disabled = false;
+        btn.innerText = 'جاري الإرسال...';
+        btn.disabled = true;
+
+        try {
+            const response = await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if(response.ok) {
+                document.getElementById('form').innerHTML = '<h2 style="margin:50px 0;">تم التسجيل بنجاح! 🎉</h2>';
+                if(tg) setTimeout(() => tg.close(), 2000);
+            } else {
+                throw new Error('Server Error');
+            }
+        } catch(e) {
+            alert("خطأ في الاتصال بالسيرفر. تأكد من تفعيل الـ Workflow في n8n.");
+            btn.innerText = 'تأكيد وإرسال';
+            btn.disabled = false;
+        }
     }
-  }
 </script>
 </body>
 </html>
