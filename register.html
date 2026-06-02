@@ -45,13 +45,14 @@
 </div>
 
 <script>
-    // تهيئة Telegram WebApp
     const tg = window.Telegram?.WebApp;
     if (tg) { tg.ready(); tg.expand(); }
 
-    // الرابط الإنتاجي الثابت
-   // الرابط التجريبي الذي تريده
-const WEBHOOK_URL = 'https://hun8n.hun8n.cfd/webhook-test/1a20b622-88c3-4feb-b27a-d9b431e2580d';
+    const WEBHOOK_URL = 'https://hun8n.hun8n.cfd/webhook-test/1a20b622-88c3-4feb-b27a-d9b431e2580d';
+
+    // قراءة message_id من الرابط
+    const urlParams = new URLSearchParams(window.location.search);
+    const msgId = urlParams.get('msg_id');
 
     async function submitData() {
         const btn = document.getElementById('btn');
@@ -68,7 +69,8 @@ const WEBHOOK_URL = 'https://hun8n.hun8n.cfd/webhook-test/1a20b622-88c3-4feb-b27
             name: name,
             job: job,
             phone: phone,
-            telegram_id: tg?.initDataUnsafe?.user?.id || 'UNKNOWN_ID'
+            telegram_id: tg?.initDataUnsafe?.user?.id || 'UNKNOWN_ID',
+            message_id: msgId
         };
 
         btn.innerText = 'جاري الإرسال...';
