@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>عملائي</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root {
+    --ink: #1c1917;
+    --ink-soft: #6b6560;
+    --paper: #faf8f5;
+    --card: #ffffff;
+    --line: #e8e3dc;
+    --brick: #b3502f;
+    --brick-soft: #f2e3db;
+    --moss: #4a6350;
+    --moss-soft: #e6ede7;
+    --danger: #b3402f;
+    --danger-soft: #f7e5e1;
+    --radius: 14px;
+    --font-display: 'Zain', 'Tahoma', sans-serif;
+    --font-body: 'IBM Plex Sans Arabic', 'Tahoma', sans-serif;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    min-height: 100vh;
+  }
+
+  body {
+    padding: 18px 16px 100px;
+  }
+
+  .eyebrow {
+    font-size: 12px;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+    margin-bottom: 2px;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 18px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .count-pill {
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--brick);
+    background: var(--brick-soft);
+    padding: 4px 10px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  /* --- Search / Combobox --- */
+  .search-wrap {
+    position: relative;
+    margin-bottom: 14px;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 14px 44px 14px 16px;
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--card);
+    font-size: 16px;
+    font-family: var(--font-body);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+
+  .search-input:focus {
+    border-color: var(--brick);
+  }
+
+  .search-icon {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: var(--ink-soft);
+    pointer-events: none;
+  }
+
+  .suggestions {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    left: 0;
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    z-index: 20;
+    box-shadow: 0 8px 24px rgba(28,25,23,0.08);
+    display: none;
+    max-height: 240px;
+    overflow-y: auto;
+  }
+
+  .suggestions.open { display: block; }
+
+  .suggestion-item {
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+    gap: 10px;
+  }
+
+  .suggestion-item:last-child { border-bottom: none; }
+  .suggestion-item:active { background: var(--brick-soft); }
+
+  .suggestion-name { font-weight: 600; font-size: 15px; }
+  .suggestion-phone {
+    font-size: 13px;
+    color: var(--ink-soft);
+    direction: ltr;
+  }
+
+  /* --- Form Card --- */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+
+  .field {
+    margin-bottom: 14px;
+  }
+
+  .field:last-child { margin-bottom: 0; }
+
+  .field label {
+    display: block;
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  .field input {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: var(--font-body);
+    background: var(--paper);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+
+  .field input:focus { border-color: var(--brick); }
+  .field input[type="tel"] { direction: ltr; text-align: right; }
+
+  .field-error {
+    font-size: 12px;
+    color: var(--danger);
+    margin-top: 5px;
+    display: none;
+  }
+
+  .field-error.show { display: block; }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s ease, opacity 0.15s ease;
+  }
+
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.5; pointer-events: none; }
+
+  .btn-primary {
+    background: var(--brick);
+    color: #fff;
+  }
+
+  .btn-danger {
+    background: var(--danger-soft);
+    color: var(--danger);
+    flex: 0 0 auto;
+    width: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-secondary {
+    background: var(--paper);
+    color: var(--ink-soft);
+    border: 1.5px solid var(--line);
+  }
+
+  /* --- List --- */
+  .list-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    margin: 22px 2px 10px;
+    letter-spacing: 0.02em;
+  }
+
+  .customer-row {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 13px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+  }
+
+  .customer-row:active { border-color: var(--brick); }
+
+  .avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--moss-soft);
+    color: var(--moss);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .customer-info { flex: 1; min-width: 0; }
+  .customer-name {
+    font-weight: 700;
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .customer-phone {
+    font-size: 13px;
+    color: var(--ink-soft);
+    direction: ltr;
+    text-align: right;
+    margin-top: 2px;
+  }
+
+  .chevron {
+    color: var(--line);
+    flex-shrink: 0;
+  }
+
+  /* --- Empty state --- */
+  .empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--ink-soft);
+  }
+
+  .empty-state svg {
+    width: 46px;
+    height: 46px;
+    color: var(--line);
+    margin-bottom: 12px;
+  }
+
+  .empty-state p {
+    font-size: 14px;
+    margin: 0;
+  }
+
+  /* --- Loading --- */
+  .skeleton-row {
+    height: 64px;
+    background: linear-gradient(90deg, var(--card) 25%, var(--brick-soft) 37%, var(--card) 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+    border-radius: 12px;
+    margin-bottom: 8px;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
+  }
+
+  /* --- Toast --- */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 16px;
+    left: 16px;
+    background: var(--ink);
+    color: #fff;
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .toast.error { background: var(--danger); }
+  .toast.success { background: var(--moss); }
+
+  /* --- New customer trigger --- */
+  .new-hint {
+    display: none;
+    padding: 12px 16px;
+    background: var(--moss-soft);
+    color: var(--moss);
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    align-items: center;
+    gap: 8px;
+  }
+  .new-hint.show { display: flex; }
+
+  .form-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 17px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .form-title .clear-link {
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+  <div class="eyebrow">الإدارة</div>
+  <h1>
+    عملائي
+    <span class="count-pill" id="countPill">—</span>
+  </h1>
+
+  <div class="search-wrap">
+    <input
+      type="text"
+      class="search-input"
+      id="nameInput"
+      placeholder="اسم العميل..."
+      autocomplete="off"
+    />
+    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <div class="suggestions" id="suggestions"></div>
+  </div>
+
+  <div class="new-hint" id="newHint">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+    عميل جديد — الرجاء إدخال رقم الهاتف ثم الحفظ
+  </div>
+
+  <div class="card">
+    <div class="form-title">
+      <span id="formTitle">إضافة عميل جديد</span>
+      <span class="clear-link" id="clearLink" style="display:none;">إلغاء التعديل</span>
+    </div>
+
+    <div class="field">
+      <label for="phoneInput">رقم الهاتف</label>
+      <input type="tel" id="phoneInput" placeholder="09XXXXXXXX" />
+      <div class="field-error" id="phoneError">رقم الهاتف مطلوب</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="saveBtn">حفظ العميل</button>
+      <button class="btn btn-danger" id="deleteBtn" style="display:none;" title="حذف العميل">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="list-label">جميع العملاء</div>
+  <div id="listContainer">
+    <div class="skeleton-row"></div>
+    <div class="skeleton-row"></div>
+    <div class="skeleton-row"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  // ============================================================
+  // CONFIG — عدّل هذا الرابط ليطابق webhook الخاص بك بـ n8n
+  // ============================================================
+  const WEBHOOK_URL = "https://hun8n.hun8n.cfd/webhook/customers";
+
+  // ============================================================
+  // Telegram WebApp init
+  // ============================================================
+  const tg = window.Telegram?.WebApp;
+  if (tg) {
+    tg.ready();
+    tg.expand();
+    tg.setHeaderColor?.("#faf8f5");
+    tg.setBackgroundColor?.("#faf8f5");
+  }
+  const initData = tg?.initData || "";
+
+  // ============================================================
+  // State
+  // ============================================================
+  let customers = [];
+  let selectedCustomerId = null; // null = adding new
+  let isLoading = false;
+
+  // ============================================================
+  // DOM refs
+  // ============================================================
+  const nameInput = document.getElementById("nameInput");
+  const phoneInput = document.getElementById("phoneInput");
+  const phoneError = document.getElementById("phoneError");
+  const suggestionsEl = document.getElementById("suggestions");
+  const listContainer = document.getElementById("listContainer");
+  const countPill = document.getElementById("countPill");
+  const saveBtn = document.getElementById("saveBtn");
+  const deleteBtn = document.getElementById("deleteBtn");
+  const formTitle = document.getElementById("formTitle");
+  const clearLink = document.getElementById("clearLink");
+  const newHint = document.getElementById("newHint");
+  const toastEl = document.getElementById("toast");
+
+  // ============================================================
+  // Toast helper
+  // ============================================================
+  function showToast(message, type = "default") {
+    toastEl.textContent = message;
+    toastEl.className = "toast show " + type;
+    setTimeout(() => { toastEl.className = "toast"; }, 2600);
+  }
+
+  // ============================================================
+  // API calls
+  // ============================================================
+  async function apiCall(payload) {
+    try {
+      const res = await fetch(WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ initData, ...payload })
+      });
+      if (!res.ok) throw new Error("request_failed");
+      return await res.json();
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async function loadCustomers() {
+    isLoading = true;
+    renderList();
+    try {
+      const data = await apiCall({ action: "list" });
+      customers = data.customers || [];
+    } catch (err) {
+      showToast("تعذّر تحميل قائمة العملاء", "error");
+      customers = [];
+    }
+    isLoading = false;
+    renderList();
+  }
+
+  async function saveCustomer() {
+    const name = nameInput.value.trim();
+    const phone = phoneInput.value.trim();
+
+    if (!name) {
+      showToast("يرجى إدخال اسم العميل", "error");
+      nameInput.focus();
+      return;
+    }
+    if (!phone) {
+      phoneError.classList.add("show");
+      phoneInput.focus();
+      return;
+    }
+    phoneError.classList.remove("show");
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = "جارٍ الحفظ...";
+
+    try {
+      const action = selectedCustomerId ? "update" : "add";
+      const data = await apiCall({
+        action,
+        customerId: selectedCustomerId,
+        name,
+        phone
+      });
+
+      if (data.success === false) {
+        showToast(data.message || "حدث خطأ، يرجى المحاولة مرة أخرى", "error");
+      } else {
+        showToast(selectedCustomerId ? "تم تعديل بيانات العميل" : "تمت إضافة العميل بنجاح", "success");
+        tg?.HapticFeedback?.notificationOccurred?.("success");
+        resetForm();
+        await loadCustomers();
+      }
+    } catch (err) {
+      showToast("تعذّر الاتصال، يرجى التحقق من الشبكة", "error");
+    }
+
+    saveBtn.disabled = false;
+    saveBtn.textContent = "حفظ العميل";
+  }
+
+  async function deleteCustomer() {
+    if (!selectedCustomerId) return;
+
+    if (tg?.showConfirm) {
+      tg.showConfirm("هل أنت متأكد من حذف هذا العميل؟", async (confirmed) => {
+        if (confirmed) await performDelete();
+      });
+    } else {
+      if (confirm("هل أنت متأكد من حذف هذا العميل؟")) await performDelete();
+    }
+  }
+
+  async function performDelete() {
+    deleteBtn.disabled = true;
+    try {
+      const data = await apiCall({ action: "delete", customerId: selectedCustomerId });
+      if (data.success === false) {
+        showToast(data.message || "تعذّر حذف العميل", "error");
+      } else {
+        showToast("تم حذف العميل بنجاح", "success");
+        tg?.HapticFeedback?.notificationOccurred?.("success");
+        resetForm();
+        await loadCustomers();
+      }
+    } catch (err) {
+      showToast("تعذّر الاتصال، يرجى التحقق من الشبكة", "error");
+    }
+    deleteBtn.disabled = false;
+  }
+
+  // ============================================================
+  // Form state helpers
+  // ============================================================
+  function resetForm() {
+    selectedCustomerId = null;
+    nameInput.value = "";
+    phoneInput.value = "";
+    phoneError.classList.remove("show");
+    formTitle.textContent = "إضافة عميل جديد";
+    clearLink.style.display = "none";
+    deleteBtn.style.display = "none";
+    newHint.classList.remove("show");
+    closeSuggestions();
+  }
+
+  function selectCustomer(customer) {
+    selectedCustomerId = customer.id;
+    nameInput.value = customer.name;
+    phoneInput.value = customer.phone || "";
+    formTitle.textContent = "تعديل بيانات العميل";
+    clearLink.style.display = "inline";
+    deleteBtn.style.display = "flex";
+    newHint.classList.remove("show");
+    closeSuggestions();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // ============================================================
+  // Suggestions (combobox)
+  // ============================================================
+  function renderSuggestions(query) {
+    const q = query.trim().toLowerCase();
+    if (!q) { closeSuggestions(); newHint.classList.remove("show"); return; }
+
+    const matches = customers.filter(c => c.name.toLowerCase().includes(q));
+
+    if (matches.length === 0) {
+      suggestionsEl.innerHTML = "";
+      closeSuggestions();
+      // exact new name -> hint that this will create a new customer
+      if (!selectedCustomerId) newHint.classList.add("show");
+      return;
+    }
+
+    newHint.classList.remove("show");
+    suggestionsEl.innerHTML = matches.slice(0, 6).map(c => `
+      <div class="suggestion-item" data-id="${c.id}">
+        <span class="suggestion-name">${escapeHtml(c.name)}</span>
+        <span class="suggestion-phone">${escapeHtml(c.phone || "")}</span>
+      </div>
+    `).join("");
+
+    suggestionsEl.querySelectorAll(".suggestion-item").forEach(item => {
+      item.addEventListener("click", () => {
+        const id = item.getAttribute("data-id");
+        const customer = customers.find(c => String(c.id) === String(id));
+        if (customer) selectCustomer(customer);
+      });
+    });
+
+    openSuggestions();
+  }
+
+  function openSuggestions() { suggestionsEl.classList.add("open"); }
+  function closeSuggestions() { suggestionsEl.classList.remove("open"); }
+
+  // ============================================================
+  // List rendering
+  // ============================================================
+  function renderList() {
+    countPill.textContent = isLoading ? "..." : `${customers.length} عميل`;
+
+    if (isLoading) {
+      listContainer.innerHTML = `
+        <div class="skeleton-row"></div>
+        <div class="skeleton-row"></div>
+        <div class="skeleton-row"></div>
+      `;
+      return;
+    }
+
+    if (customers.length === 0) {
+      listContainer.innerHTML = `
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+          </svg>
+          <p>لا يوجد عملاء حتى الآن<br>يرجى إضافة العميل الأول من الأعلى</p>
+        </div>
+      `;
+      return;
+    }
+
+    listContainer.innerHTML = customers.map(c => `
+      <div class="customer-row" data-id="${c.id}">
+        <div class="avatar">${initials(c.name)}</div>
+        <div class="customer-info">
+          <div class="customer-name">${escapeHtml(c.name)}</div>
+          <div class="customer-phone">${escapeHtml(c.phone || "—")}</div>
+        </div>
+        <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </div>
+    `).join("");
+
+    listContainer.querySelectorAll(".customer-row").forEach(row => {
+      row.addEventListener("click", () => {
+        const id = row.getAttribute("data-id");
+        const customer = customers.find(c => String(c.id) === String(id));
+        if (customer) selectCustomer(customer);
+      });
+    });
+  }
+
+  function initials(name) {
+    const parts = name.trim().split(/\s+/);
+    return parts[0]?.[0]?.toUpperCase() || "؟";
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // ============================================================
+  // Event bindings
+  // ============================================================
+  nameInput.addEventListener("input", (e) => {
+    if (selectedCustomerId) {
+      // typing after selecting = treat as editing name of selected customer
+    }
+    renderSuggestions(e.target.value);
+  });
+
+  nameInput.addEventListener("focus", () => {
+    if (nameInput.value.trim()) renderSuggestions(nameInput.value);
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".search-wrap")) closeSuggestions();
+  });
+
+  phoneInput.addEventListener("input", () => phoneError.classList.remove("show"));
+
+  saveBtn.addEventListener("click", saveCustomer);
+  deleteBtn.addEventListener("click", deleteCustomer);
+  clearLink.addEventListener("click", resetForm);
+
+  // ============================================================
+  // Init
+  // ============================================================
+  loadCustomers();
+</script>
+</body>
+</html>
